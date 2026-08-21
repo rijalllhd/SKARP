@@ -19,7 +19,7 @@ class FirebaseSensorService
 
     private function database(): Database
     {
-        $credentialsPath = storage_path('app/firebase-credentials.json');
+        $credentialsPath = config('firebase_client.credentials');
 
         if (! file_exists($credentialsPath)) {
             throw new \RuntimeException("Firebase credentials file not found at: {$credentialsPath}");

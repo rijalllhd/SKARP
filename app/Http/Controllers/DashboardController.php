@@ -48,7 +48,7 @@ class DashboardController extends Controller
         ];
         
         try {
-            $credentialsPath = storage_path('app/firebase-credentials.json');
+            $credentialsPath = config('firebase_client.credentials');
             
             // Check if credentials file exists
             if (!file_exists($credentialsPath)) {
@@ -56,7 +56,7 @@ class DashboardController extends Controller
             }
             
             $factory = (new Factory)->withServiceAccount($credentialsPath)
-                                    ->withDatabaseUri(env('FIREBASE_DATABASE_URL'));
+                                    ->withDatabaseUri(config('firebase_client.database_url'));
             $database = $factory->createDatabase();
             
             // Get Realtime data
