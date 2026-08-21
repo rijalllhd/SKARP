@@ -1,0 +1,42 @@
+<?php
+
+namespace App\Console\Commands;
+
+use App\Services\FirebaseSensorService;
+use App\Services\FonnteService;
+use App\Services\SensorMessageService;
+use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Cache;
+
+class SendHighSensorAlert extends Command
+{
+    protected $signature = 'sensor:check-alerts';
+    protected $description = 'Kirim peringatan WhatsApp ketika THI atau amonia sangat tinggi';
+
+    public function handle(FirebaseSensorService $sensor, FonnteService $fonnte, SensorMessageService $message): int
+    {
+        try {
+            $data = $sensor->realtime();
+            $isDangerous = (float) ($data['THI'] ?? 0) >= config('sensor_alerts.thi')
+                || (float) ($data['Amonia_PPM'] ?? 0) >= config('sensor_alerts.amonia');
+
+            if (! $isDangerous) {
+                Cache::forget('sensor-high-alert-active');
+                return self::SUCCESS;
+            }
+
+            if (! Cache::add('sensor-high-alert-active', true, now()->addMinutes(config('sensor_alerts.cooldown_minutes')))) {
+                return self::SUCCESS;
+            }
+
+            $response = $fonnte->send($message->highAlert($data));
+            $response->throw();
+            $this->warn('Peringatan WhatsApp terkirim.');
+            return self::SUCCESS;
+        } catch (\Throwable $exception) {
+            report($exception);
+            $this->error($exception->getMessage());
+            return self::FAILURE;
+        }
+    }
+}
