@@ -1,17 +1,5 @@
 # syntax=docker/dockerfile:1
 
-FROM composer:2 AS vendor
-
-WORKDIR /var/www/html
-COPY composer.json composer.lock ./
-RUN composer install \
-    --no-dev \
-    --no-interaction \
-    --no-progress \
-    --prefer-dist \
-    --optimize-autoloader \
-    --no-scripts
-
 FROM php:8.3-fpm-bookworm AS app
 
 WORKDIR /var/www/html
@@ -34,8 +22,19 @@ RUN apt-get update \
         zip \
     && rm -rf /var/lib/apt/lists/*
 
+# Composer dijalankan pada PHP 8.3 yang sama dengan runtime. Image composer:2
+# saat ini memakai PHP 8.5, sedangkan dependency Firebase proyek mendukung s.d. 8.4.
+COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
+COPY composer.json composer.lock ./
+RUN composer install \
+    --no-dev \
+    --no-interaction \
+    --no-progress \
+    --prefer-dist \
+    --optimize-autoloader \
+    --no-scripts
+
 COPY . .
-COPY --from=vendor /var/www/html/vendor ./vendor
 COPY docker/php/opcache.ini /usr/local/etc/php/conf.d/opcache.ini
 COPY docker/entrypoint.sh /usr/local/bin/app-entrypoint
 
