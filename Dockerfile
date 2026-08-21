@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM php:8.3-fpm-bookworm AS app
+FROM php:8.4-fpm-bookworm AS app
 
 WORKDIR /var/www/html
 
@@ -10,6 +10,7 @@ RUN apt-get update \
         libicu-dev \
         libjpeg62-turbo-dev \
         libpng-dev \
+        libsqlite3-dev \
         libzip-dev \
         unzip \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
