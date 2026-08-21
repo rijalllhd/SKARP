@@ -42,5 +42,10 @@ RUN chmod +x /usr/local/bin/app-entrypoint \
     && mkdir -p storage/app/public storage/app/private storage/framework/cache/data storage/framework/sessions storage/framework/views storage/logs bootstrap/cache \
     && chown -R www-data:www-data storage bootstrap/cache
 
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
+    CMD php-fpm -t && exit 0 || exit 1
+
+ENV PHP_OPCACHE_ENABLE=1
+
 ENTRYPOINT ["app-entrypoint"]
 CMD ["php-fpm"]
