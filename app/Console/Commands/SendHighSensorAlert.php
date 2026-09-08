@@ -16,12 +16,16 @@ class SendHighSensorAlert extends Command
     public function handle(FirebaseSensorService $sensor, FonnteService $fonnte, SensorMessageService $message): int
     {
         try {
+            // Sesudah pesan terkirim, jangan membaca Firebase lagi sampai masa tunggu selesai.
+            if (Cache::has('sensor-high-alert-active')) {
+                return self::SUCCESS;
+            }
+
             $data = $sensor->realtime();
             $isDangerous = (float) ($data['THI'] ?? 0) > config('sensor_alerts.extreme_thi')
                 || (float) ($data['Amonia_PPM'] ?? 0) > config('sensor_alerts.extreme_amonia');
 
             if (! $isDangerous) {
-                Cache::forget('sensor-high-alert-active');
                 return self::SUCCESS;
             }
 

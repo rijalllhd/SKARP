@@ -8,5 +8,5 @@ return [
     // Ambang khusus notifikasi WhatsApp kondisi ekstrem.
     'extreme_amonia' => (float) env('ALERT_EXTREME_AMONIA_THRESHOLD', 50),
     'extreme_thi' => (float) env('ALERT_EXTREME_THI_THRESHOLD', 85),
-    'cooldown_minutes' => (int) env('ALERT_COOLDOWN_MINUTES', 30),
+    'cooldown_minutes' => (int) env('ALERT_COOLDOWN_MINUTES', 360),
 ];

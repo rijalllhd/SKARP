@@ -38,7 +38,7 @@ Isi variabel berikut di `.env`:
 | `WA_TARGET_NUMBER` | Nomor tujuan, format: `628xxxxxxxxxx` |
 | `ALERT_AMONIA_THRESHOLD` | Ambang amonia untuk peringatan tinggi, default: `25` ppm |
 | `ALERT_THI_THRESHOLD` | Ambang THI untuk peringatan tinggi, default: `83` |
-| `ALERT_COOLDOWN_MINUTES` | Jeda pengiriman ulang peringatan, default: `30` menit |
+| `ALERT_COOLDOWN_MINUTES` | Waktu tunggu sebelum sistem memindai ulang kondisi ekstrem, default: `360` menit (6 jam). |
 | `RECAP_SECRET` | String acak bebas, contoh: `skarp-iot-2025-secret` |
 
 Untuk deployment tanpa file rahasia (misalnya Wasmer), isi `FIREBASE_CREDENTIALS_BASE64` dengan JSON service-account Firebase yang sudah diubah menjadi Base64 satu baris. Aplikasi akan membuat file kredensial secara otomatis ketika berjalan.
@@ -75,7 +75,7 @@ Tambahkan ke crontab server:
 Jadwal default:
 
 - Rekap setiap hari pukul **20:00 WIB**.
-- Pengecekan nilai THI/amonia setiap 10 detik. WhatsApp hanya dikirim untuk kondisi ekstrem: amonia `> 50 ppm` atau THI `> 85`, dengan jeda ulang sesuai `ALERT_COOLDOWN_MINUTES`.
+- Setelah WhatsApp terkirim, sistem menunggu 6 jam tanpa memindai Firebase. Setelahnya, sistem hanya mengirim ulang bila amonia masih `> 50 ppm` atau THI masih `> 85`; siklus ini berulang seterusnya.
 
 Pada Windows untuk pengembangan, jalankan proses scheduler terpisah:
 ```bash

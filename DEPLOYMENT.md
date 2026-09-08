@@ -27,7 +27,7 @@ Masukkan seluruh nilai di bawah pada halaman Environment Dockploy. Compose mener
 | `FIREBASE_*` | Salin dari Firebase Project Settings. |
 | `FONNTE_TOKEN`, `WA_TARGET_NUMBER` | Token Fonnte dan nomor format `628…`. |
 | `RECAP_SECRET` | String acak panjang khusus endpoint rekap. |
-| `ALERT_AMONIA_THRESHOLD`, `ALERT_THI_THRESHOLD`, `ALERT_COOLDOWN_MINUTES` | Opsional; default `25`, `83`, `30`. |
+| `ALERT_AMONIA_THRESHOLD`, `ALERT_THI_THRESHOLD`, `ALERT_COOLDOWN_MINUTES` | Opsional; default `25`, `83`, `360` (6 jam). |
 
 Gunakan nilai dari `.env.example` sebagai daftar lengkap. Aplikasi berjalan tanpa database (cache/sesi `file`, queue `sync`), jadi tidak ada variabel `DB_*` yang perlu diisi.
 
