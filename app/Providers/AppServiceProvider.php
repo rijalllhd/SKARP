@@ -19,15 +19,17 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Buat file firebase.json di Wasmer jika variabel env tersedia
-        if (env('FIREBASE_JSON_CONTENT')) {
-            $path = storage_path('app/firebase-credentials.json');
-            if (!file_exists($path)) {
-                if (!file_exists(storage_path('app'))) {
-                    mkdir(storage_path('app'), 0755, true);
-                }
-                file_put_contents($path, env('FIREBASE_JSON_CONTENT'));
+        $targetPath = storage_path('app/firebase-credentials.json');
+
+        // Buat file firebase-credentials.json jika belum ada di server Wasmer
+        if (!file_exists($targetPath) && env('FIREBASE_CREDENTIALS_BASE64')) {
+            $dir = dirname($targetPath);
+            if (!file_exists($dir)) {
+                mkdir($dir, 0755, true);
             }
+            
+            $jsonContent = base64_decode(env('FIREBASE_CREDENTIALS_BASE64'));
+            file_put_contents($targetPath, $jsonContent);
         }
     }
 }
