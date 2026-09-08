@@ -6,6 +6,7 @@
 /storage/*.key
 /storage/pail
 /vendor
+firebase-credentials.json
 .env
 .env.backup
 .env.production
