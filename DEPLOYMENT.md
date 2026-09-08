@@ -1,6 +1,6 @@
 # Deployment development di Dockploy
 
-Repository ini siap dideploy sebagai **Docker Compose**. Satu deployment membuat lima container: `web` (Nginx), `app` (Laravel/PHP-FPM), `scheduler` (jadwal 10 detik), `queue`, dan `database` (MariaDB). Data MariaDB dan folder `storage` berada pada named volume sehingga tetap ada setelah redeploy.
+Repository ini siap dideploy sebagai **Docker Compose**. Satu deployment membuat empat container: `web` (Nginx), `app` (Laravel/PHP-FPM), `scheduler` (jadwal 10 detik), dan `queue`. Tidak ada service database — sesi/cache pakai driver `file` dan queue pakai `sync`. Folder `storage` berada pada named volume `laravel_storage` sehingga tetap ada setelah redeploy.
 
 ## 1. Persiapan repository
 
@@ -16,7 +16,7 @@ Push seluruh perubahan ini ke repository Git. Jangan commit `.env` atau `firebas
 
 ## 3. Isi environment variables di Dockploy
 
-Masukkan seluruh nilai di bawah pada halaman Environment Dockploy. Compose meneruskannya ke semua service Laravel dan ke MariaDB; file `.env` di server tidak diperlukan.
+Masukkan seluruh nilai di bawah pada halaman Environment Dockploy. Compose meneruskannya ke semua service Laravel; file `.env` di server tidak diperlukan. Aplikasi tidak memakai database, jadi tidak ada variabel `DB_*`.
 
 | Variabel | Nilai/panduan |
 | --- | --- |
@@ -24,14 +24,12 @@ Masukkan seluruh nilai di bawah pada halaman Environment Dockploy. Compose mener
 | `APP_URL` | URL HTTPS final, mis. `https://dev-dashboard.example.com`. |
 | `APP_ENV` | `development` atau `production`; untuk server publik disarankan `production`. |
 | `APP_DEBUG` | `false` pada server yang dapat diakses publik. |
-| `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD` | Kredensial MariaDB baru dan kuat. |
-| `DB_ROOT_PASSWORD` | Password root MariaDB baru dan kuat, berbeda dari `DB_PASSWORD`. |
 | `FIREBASE_*` | Salin dari Firebase Project Settings. |
 | `FONNTE_TOKEN`, `WA_TARGET_NUMBER` | Token Fonnte dan nomor format `628…`. |
 | `RECAP_SECRET` | String acak panjang khusus endpoint rekap. |
 | `ALERT_AMONIA_THRESHOLD`, `ALERT_THI_THRESHOLD`, `ALERT_COOLDOWN_MINUTES` | Opsional; default `25`, `83`, `30`. |
 
-Gunakan nilai dari `.env.example` sebagai daftar lengkap. Tidak perlu mengisi `DB_HOST`, `DB_PORT`, atau `DB_CONNECTION`: Compose menetapkannya ke jaringan internal secara aman.
+Gunakan nilai dari `.env.example` sebagai daftar lengkap. Aplikasi berjalan tanpa database (cache/sesi `file`, queue `sync`), jadi tidak ada variabel `DB_*` yang perlu diisi.
 
 ## 4. Firebase Admin credentials
 
@@ -45,7 +43,7 @@ Pastikan user container dapat membacanya. Setelah deployment pertama, gunakan fi
 
 ## 5. Deploy dan verifikasi
 
-Deploy. Saat container `app` pertama kali hidup, ia otomatis menjalankan migration, membuat symbolic link `public/storage`, dan menyimpan cache konfigurasi. Cek berikut setelah deployment:
+Deploy. Saat container `app` pertama kali hidup, ia otomatis membuat symbolic link `public/storage` dan menyimpan cache konfigurasi. Cek berikut setelah deployment:
 
 1. Buka `https://domain-anda/up`; harus mengembalikan status sehat Laravel.
 2. Buka dashboard dan pastikan data Firebase tampil.
@@ -54,7 +52,6 @@ Deploy. Saat container `app` pertama kali hidup, ia otomatis menjalankan migrati
 
 ## Operasional
 
-- Redeploy aman dan tidak menghapus volume. Menghapus Compose service/volume `mariadb_data` akan menghapus database secara permanen.
-- Backup berkala volume `mariadb_data` dan JSON Firebase. Sebelum mengganti `DB_PASSWORD` atau `DB_ROOT_PASSWORD`, pastikan database volume baru atau lakukan rotasi password di MariaDB; mengganti variabel saja tidak mengubah password pada database yang sudah ada.
+- Redeploy aman dan tidak menghapus volume `laravel_storage`.
+- Backup berkala JSON Firebase (di volume `laravel_storage`, path `storage/app/firebase-credentials.json`).
 - Log diarahkan ke stderr agar terlihat di Dockploy. Untuk menelusuri masalah, cek log service `app`, `scheduler`, dan `queue`.
-- Saat melakukan perubahan schema, migration otomatis berjalan pada deploy berikutnya. Backup database sebelum migration yang bersifat destruktif.

@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM php:8.3-fpm-bookworm AS app
+FROM php:8.4-fpm-bookworm AS app
 
 WORKDIR /var/www/html
 
@@ -10,6 +10,7 @@ RUN apt-get update \
         libicu-dev \
         libjpeg62-turbo-dev \
         libpng-dev \
+        libsqlite3-dev \
         libzip-dev \
         unzip \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
@@ -41,6 +42,11 @@ COPY docker/entrypoint.sh /usr/local/bin/app-entrypoint
 RUN chmod +x /usr/local/bin/app-entrypoint \
     && mkdir -p storage/app/public storage/app/private storage/framework/cache/data storage/framework/sessions storage/framework/views storage/logs bootstrap/cache \
     && chown -R www-data:www-data storage bootstrap/cache
+
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
+    CMD php-fpm -t && exit 0 || exit 1
+
+ENV PHP_OPCACHE_ENABLE=1
 
 ENTRYPOINT ["app-entrypoint"]
 CMD ["php-fpm"]
