@@ -17,8 +17,8 @@ class SendHighSensorAlert extends Command
     {
         try {
             $data = $sensor->realtime();
-            $isDangerous = (float) ($data['THI'] ?? 0) >= config('sensor_alerts.thi')
-                || (float) ($data['Amonia_PPM'] ?? 0) >= config('sensor_alerts.amonia');
+            $isDangerous = (float) ($data['THI'] ?? 0) > config('sensor_alerts.extreme_thi')
+                || (float) ($data['Amonia_PPM'] ?? 0) > config('sensor_alerts.extreme_amonia');
 
             if (! $isDangerous) {
                 Cache::forget('sensor-high-alert-active');

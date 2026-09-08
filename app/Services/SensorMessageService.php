@@ -21,11 +21,28 @@ class SensorMessageService
 
     public function highAlert(array $data): string
     {
+        $thi = (float) ($data['THI'] ?? 0);
+        $amonia = (float) ($data['Amonia_PPM'] ?? 0);
+        $suhu = (float) ($data['Suhu'] ?? 0);
+        $kelembapan = (float) ($data['Kelembapan'] ?? 0);
+        $triggers = [];
+
+        if ($amonia > config('sensor_alerts.extreme_amonia')) {
+            $triggers[] = 'Amonia di atas '.number_format(config('sensor_alerts.extreme_amonia'), 0).' ppm';
+        }
+
+        if ($thi > config('sensor_alerts.extreme_thi')) {
+            $triggers[] = 'THI di atas '.number_format(config('sensor_alerts.extreme_thi'), 0);
+        }
+
         return "*PERINGATAN SENSOR SKARP*\n"
             . now('Asia/Jakarta')->format('d-m-Y H:i:s').' WIB' . "\n\n"
-            . '*THI:* '.number_format((float) ($data['THI'] ?? 0), 2)."\n"
-            . '*Amonia:* '.number_format((float) ($data['Amonia_PPM'] ?? 0), 5)." ppm\n\n"
-            . 'Nilai melewati ambang bahaya. Segera periksa kondisi kandang dan perangkat.';
+            . '*Kondisi ekstrem:* '.implode(' / ', $triggers)."\n\n"
+            . '*Suhu:* '.number_format($suhu, 1)." C\n"
+            . '*Kelembapan:* '.number_format($kelembapan, 1)." %\n"
+            . '*THI:* '.number_format($thi, 2)."\n"
+            . '*Amonia:* '.number_format($amonia, 5)." ppm\n\n"
+            . 'Segera periksa kondisi kandang dan perangkat.';
     }
 
     private function thiStatus(float $thi): string
