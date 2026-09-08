@@ -18,20 +18,31 @@ class AppServiceProvider extends ServiceProvider
 
     private function ensureFirebaseCredentialsExist(): void
     {
-        $targetPath = storage_path('app/firebase-credentials.json');
+        $targetPath = config('firebase_client.credentials', storage_path('app/firebase-credentials.json'));
 
-        if (!file_exists($targetPath)) {
-            // Ambil dari getenv() atau env()
-            $base64 = getenv('FIREBASE_CREDENTIALS_BASE64') ?: env('FIREBASE_CREDENTIALS_BASE64');
-
-            if ($base64) {
-                $dir = dirname($targetPath);
-                if (!file_exists($dir)) {
-                    mkdir($dir, 0755, true);
-                }
-
-                file_put_contents($targetPath, base64_decode($base64));
-            }
+        if (file_exists($targetPath)) {
+            return;
         }
+
+        $base64 = getenv('FIREBASE_CREDENTIALS_BASE64') ?: env('FIREBASE_CREDENTIALS_BASE64');
+        if (! $base64) {
+            return;
+        }
+
+        $json = base64_decode($base64, true);
+        if ($json === false || json_decode($json, true) === null) {
+            throw new \RuntimeException('FIREBASE_CREDENTIALS_BASE64 harus berisi JSON service-account Firebase yang valid dalam format Base64.');
+        }
+
+        $directory = dirname($targetPath);
+        if (! is_dir($directory) && ! mkdir($directory, 0755, true) && ! is_dir($directory)) {
+            throw new \RuntimeException("Tidak dapat membuat direktori Firebase credentials: {$directory}");
+        }
+
+        if (file_put_contents($targetPath, $json, LOCK_EX) === false) {
+            throw new \RuntimeException("Tidak dapat menulis Firebase credentials: {$targetPath}");
+        }
+
+        @chmod($targetPath, 0600);
     }
 }

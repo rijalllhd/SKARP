@@ -33,13 +33,19 @@ Gunakan nilai dari `.env.example` sebagai daftar lengkap. Aplikasi berjalan tanp
 
 ## 4. Firebase Admin credentials
 
-Unduh service-account JSON dari Firebase Console. Compose sudah memasang named volume `laravel_storage` yang sama pada service `app`, `scheduler`, dan `queue`. Upload file JSON sekali ke path berikut di volume tersebut:
+Jangan unggah file service-account JSON ke GitHub. Untuk hosting yang menyediakan secret environment variable, termasuk Wasmer, masukkan isi file tersebut dalam Base64 sebagai `FIREBASE_CREDENTIALS_BASE64`. Saat aplikasi mulai, Laravel memvalidasi nilainya lalu membuat `storage/app/firebase-credentials.json` secara lokal di container dengan izin file terbatas.
 
-`/var/www/html/storage/app/firebase-credentials.json`
+Di PowerShell, buat nilai Base64 satu baris dari file JSON yang diunduh dari Firebase Console:
 
-Pastikan user container dapat membacanya. Setelah deployment pertama, gunakan file manager/terminal Dockploy untuk upload JSON ke path tersebut. Jangan masukkan isi JSON ke Git atau environment variable biasa.
+```powershell
+[Convert]::ToBase64String([IO.File]::ReadAllBytes('C:\path\ke\firebase-credentials.json'))
+```
 
-`FIREBASE_CREDENTIALS` sudah menunjuk pada path container tersebut. Jika memakai mount path lain, ubah variabel itu ke path absolut yang sama di ketiga service.
+Salin seluruh hasilnya ke secret `FIREBASE_CREDENTIALS_BASE64`. Tetap gunakan `FIREBASE_CREDENTIALS=/var/www/html/storage/app/firebase-credentials.json`.
+
+Untuk Wasmer: buka aplikasi di dashboard, pilih **Settings → Environment Vars**, tambahkan `FIREBASE_CREDENTIALS_BASE64`, lalu pilih **Save and Redeploy**. Wasmer menyimpan environment variable tersebut sebagai secret dan tidak memasukkannya ke repository. [Dokumentasi Wasmer](https://docs.wasmer.io/edge/learn/secrets/).
+
+Metode upload file ke volume tetap dapat dipakai untuk Docker Compose; cukup biarkan `FIREBASE_CREDENTIALS_BASE64` kosong dan upload JSON ke `storage/app/firebase-credentials.json`.
 
 ## 5. Deploy dan verifikasi
 
@@ -53,5 +59,5 @@ Deploy. Saat container `app` pertama kali hidup, ia otomatis membuat symbolic li
 ## Operasional
 
 - Redeploy aman dan tidak menghapus volume `laravel_storage`.
-- Backup berkala JSON Firebase (di volume `laravel_storage`, path `storage/app/firebase-credentials.json`).
+- Backup aman kredensial Firebase dari sumber aslinya; jangan backup atau commit file JSON ke repository.
 - Log diarahkan ke stderr agar terlihat di Dockploy. Untuk menelusuri masalah, cek log service `app`, `scheduler`, dan `queue`.

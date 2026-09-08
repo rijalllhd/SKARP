@@ -41,6 +41,8 @@ Isi variabel berikut di `.env`:
 | `ALERT_COOLDOWN_MINUTES` | Jeda pengiriman ulang peringatan, default: `30` menit |
 | `RECAP_SECRET` | String acak bebas, contoh: `skarp-iot-2025-secret` |
 
+Untuk deployment tanpa file rahasia (misalnya Wasmer), isi `FIREBASE_CREDENTIALS_BASE64` dengan JSON service-account Firebase yang sudah diubah menjadi Base64 satu baris. Aplikasi akan membuat file kredensial secara otomatis ketika berjalan.
+
 ### 3. Jalankan
 ```bash
 php artisan serve
@@ -73,7 +75,7 @@ Tambahkan ke crontab server:
 Jadwal default:
 
 - Rekap setiap hari pukul **20:00 WIB**.
-- Pengecekan nilai THI/amonia setiap 10 detik. Jika nilainya melewati ambang tinggi, WhatsApp dikirim dengan jeda ulang sesuai `ALERT_COOLDOWN_MINUTES`.
+- Pengecekan nilai THI/amonia setiap 10 detik. WhatsApp hanya dikirim untuk kondisi ekstrem: amonia `> 50 ppm` atau THI `> 85`, dengan jeda ulang sesuai `ALERT_COOLDOWN_MINUTES`.
 
 Pada Windows untuk pengembangan, jalankan proses scheduler terpisah:
 ```bash
