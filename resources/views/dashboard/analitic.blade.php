@@ -10,8 +10,8 @@
         return number_format($historyChartData[$key][$latestIndex], $digits);
     };
 @endphp
-<div class="min-h-screen bg-slate-100 p-4 sm:p-6">
-    <div class="mx-auto flex max-w-7xl flex-col gap-4 lg:flex-row">
+<div class="min-h-screen bg-slate-100 p-4 sm:p-6 xl:p-8 2xl:p-10">
+    <div class="mx-auto flex w-full max-w-[1800px] flex-col gap-4 lg:flex-row xl:gap-6">
         @include('dashboard.partials.sidebar')
 
         <main class="min-w-0 flex-1">
@@ -36,7 +36,7 @@
                             </div>
                             <span class="rounded-full border border-sky-100 bg-sky-50 px-3 py-1 text-xs font-extrabold text-sky-700">Y: suhu rata-rata</span>
                         </div>
-                        <div class="h-64"><canvas id="chart-suhu"></canvas></div>
+                        <div class="h-64 2xl:h-80"><canvas id="chart-suhu"></canvas></div>
                         <p class="mt-4 text-2xl font-extrabold text-slate-950">{{ $latestValue('suhu', 1) }} <span class="text-sm text-slate-500">&deg;C terakhir</span></p>
                     </article>
 
@@ -48,7 +48,7 @@
                             </div>
                             <span class="rounded-full border border-teal-100 bg-teal-50 px-3 py-1 text-xs font-extrabold text-teal-700">Y: RH rata-rata</span>
                         </div>
-                        <div class="h-64"><canvas id="chart-kelembapan"></canvas></div>
+                        <div class="h-64 2xl:h-80"><canvas id="chart-kelembapan"></canvas></div>
                         <p class="mt-4 text-2xl font-extrabold text-slate-950">{{ $latestValue('kelembapan', 1) }} <span class="text-sm text-slate-500">% terakhir</span></p>
                     </article>
 
@@ -60,7 +60,7 @@
                             </div>
                             <span class="rounded-full border border-amber-100 bg-amber-50 px-3 py-1 text-xs font-extrabold text-amber-700">Y: amonia rata-rata</span>
                         </div>
-                        <div class="h-64"><canvas id="chart-amonia"></canvas></div>
+                        <div class="h-64 2xl:h-80"><canvas id="chart-amonia"></canvas></div>
                         <p class="mt-4 text-2xl font-extrabold text-slate-950">{{ $latestValue('amonia_ppm', 3) }} <span class="text-sm text-slate-500">ppm terakhir</span></p>
                     </article>
 
@@ -72,7 +72,7 @@
                             </div>
                             <span class="rounded-full border border-violet-100 bg-violet-50 px-3 py-1 text-xs font-extrabold text-violet-700">Y: THI rata-rata</span>
                         </div>
-                        <div class="h-64"><canvas id="chart-thi"></canvas></div>
+                        <div class="h-64 2xl:h-80"><canvas id="chart-thi"></canvas></div>
                         <p class="mt-4 text-2xl font-extrabold text-slate-950">{{ $latestValue('thi', 2) }} <span class="text-sm text-slate-500">terakhir</span></p>
                     </article>
                 </div>

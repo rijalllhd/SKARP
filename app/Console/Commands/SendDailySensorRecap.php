@@ -15,14 +15,21 @@ class SendDailySensorRecap extends Command
     public function handle(FirebaseSensorService $sensor, FonnteService $fonnte, SensorMessageService $message): int
     {
         try {
-            $response = $fonnte->send($message->recap($sensor->realtime()));
-            $response->throw();
+            $this->ensureWhatsAppIsConfigured();
+            $fonnte->send($message->recap($sensor->realtime()));
             $this->info('Rekap WhatsApp terkirim.');
             return self::SUCCESS;
         } catch (\Throwable $exception) {
             report($exception);
             $this->error($exception->getMessage());
             return self::FAILURE;
+        }
+    }
+
+    private function ensureWhatsAppIsConfigured(): void
+    {
+        if (! config('services.fonnte.token') || ! config('services.fonnte.target')) {
+            throw new \RuntimeException('FONNTE_TOKEN atau WA_TARGET_NUMBER belum dikonfigurasi.');
         }
     }
 }

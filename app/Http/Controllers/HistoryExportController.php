@@ -14,7 +14,12 @@ class HistoryExportController extends Controller
     public function excel(Request $request, FirebaseSensorService $sensor)
     {
         $filter = $this->filter($request, $sensor);
-        return Excel::download(new SensorHistoryExport($filter['rows']), 'riwayat-sensor-'.$filter['suffix'].'.xlsx');
+        return Excel::download(
+            new SensorHistoryExport($filter['rows']),
+            'riwayat-sensor-'.$filter['suffix'].'.xlsx',
+            \Maatwebsite\Excel\Excel::XLSX,
+            ['Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet']
+        );
     }
 
     public function pdf(Request $request, FirebaseSensorService $sensor)
@@ -42,6 +47,7 @@ class HistoryExportController extends Controller
 
         $rows = collect($sensor->history())
             ->filter(fn ($entry) => isset($entry['timestamp']) && Carbon::hasFormat($entry['timestamp'], 'Y-m-d H:i:s'))
+            ->reject(fn ($entry) => isset($entry['amonia_ppm']) && is_numeric($entry['amonia_ppm']) && (float) $entry['amonia_ppm'] > config('sensor_alerts.history_max_amonia'))
             ->filter(function ($entry) use ($start, $end) {
                 $timestamp = Carbon::createFromFormat('Y-m-d H:i:s', $entry['timestamp'], 'Asia/Jakarta');
                 return (! $start || $timestamp->gte($start)) && (! $end || $timestamp->lte($end));

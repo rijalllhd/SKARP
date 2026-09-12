@@ -28,6 +28,7 @@ Masukkan seluruh nilai di bawah pada halaman Environment Dockploy. Compose mener
 | `FONNTE_TOKEN`, `WA_TARGET_NUMBER` | Token Fonnte dan nomor format `628…`. |
 | `RECAP_SECRET` | String acak panjang khusus endpoint rekap. |
 | `ALERT_AMONIA_THRESHOLD`, `ALERT_THI_THRESHOLD`, `ALERT_COOLDOWN_MINUTES` | Opsional; default `25`, `83`, `360` (6 jam). |
+| `HISTORY_MAX_AMONIA_PPM` | Opsional; default `50`. Data lebih besar dari nilai ini tidak muncul pada riwayat, grafik, dan ekspor. |
 
 Gunakan nilai dari `.env.example` sebagai daftar lengkap. Aplikasi berjalan tanpa database (cache/sesi `file`, queue `sync`), jadi tidak ada variabel `DB_*` yang perlu diisi.
 
@@ -61,3 +62,9 @@ Deploy. Saat container `app` pertama kali hidup, ia otomatis membuat symbolic li
 - Redeploy aman dan tidak menghapus volume `laravel_storage`.
 - Backup aman kredensial Firebase dari sumber aslinya; jangan backup atau commit file JSON ke repository.
 - Log diarahkan ke stderr agar terlihat di Dockploy. Untuk menelusuri masalah, cek log service `app`, `scheduler`, dan `queue`.
+
+## Wasmer Edge
+
+Wasmer Edge bukan runtime Docker Compose yang selalu menyala; instance HTTP dapat dihentikan saat idle. Karena itu, jangan mengandalkan container `scheduler` pada `docker-compose.yml` untuk deployment Wasmer. Gunakan konfigurasi root [wasmer.toml](wasmer.toml) dan [app.yaml](app.yaml), lalu deploy dengan `wasmer deploy`.
+
+`app.yaml` membuat Wasmer Jobs yang menjalankan command Artisan secara langsung: rekap setiap `13:00 UTC` (`20:00 WIB`) dan pemeriksaan alert setiap satu menit. Volume persisten `/data` menyimpan kredensial Firebase dan cache cooldown, sehingga alert tidak berulang setiap menit selama kondisi ekstrem masih berlangsung. Tambahkan secret aplikasi melalui dashboard/CLI Wasmer—minimal `APP_KEY`, seluruh `FIREBASE_*`, `FONNTE_TOKEN`, `WA_TARGET_NUMBER`, dan `FIREBASE_CREDENTIALS_BASE64`—kemudian redeploy. Jangan menyimpan secret pada `app.yaml`.

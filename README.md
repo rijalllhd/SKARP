@@ -39,6 +39,7 @@ Isi variabel berikut di `.env`:
 | `ALERT_AMONIA_THRESHOLD` | Ambang amonia untuk peringatan tinggi, default: `25` ppm |
 | `ALERT_THI_THRESHOLD` | Ambang THI untuk peringatan tinggi, default: `83` |
 | `ALERT_COOLDOWN_MINUTES` | Waktu tunggu sebelum sistem memindai ulang kondisi ekstrem, default: `360` menit (6 jam). |
+| `HISTORY_MAX_AMONIA_PPM` | Batas data amonia valid untuk riwayat, grafik, dan ekspor; nilai `> 50` ppm diabaikan. |
 | `RECAP_SECRET` | String acak bebas, contoh: `skarp-iot-2025-secret` |
 
 Untuk deployment tanpa file rahasia (misalnya Wasmer), isi `FIREBASE_CREDENTIALS_BASE64` dengan JSON service-account Firebase yang sudah diubah menjadi Base64 satu baris. Aplikasi akan membuat file kredensial secara otomatis ketika berjalan.
@@ -76,6 +77,7 @@ Jadwal default:
 
 - Rekap setiap hari pukul **20:00 WIB**.
 - Setelah WhatsApp terkirim, sistem menunggu 6 jam tanpa memindai Firebase. Setelahnya, sistem hanya mengirim ulang bila amonia masih `> 50 ppm` atau THI masih `> 85`; siklus ini berulang seterusnya.
+- Pengiriman dianggap gagal bila Fonnte mengembalikan status penolakan, meski HTTP-nya `200`; alert akan dicoba lagi pada jadwal berikutnya dan tidak masuk cooldown.
 
 Pada Windows untuk pengembangan, jalankan proses scheduler terpisah:
 ```bash
@@ -83,6 +85,17 @@ php artisan schedule:work
 ```
 
 Jadwal aplikasi didefinisikan di `routes/console.php`.
+
+### Hosting di Wasmer Edge
+
+Wasmer Edge tidak menjalankan `docker-compose.yml` atau proses `schedule:work` secara terus-menerus: instance HTTP dapat berhenti saat idle. Repository ini menyediakan `wasmer.toml` dan `app.yaml` agar **Wasmer Jobs** memanggil command Artisan langsung:
+
+- rekap harian: `20:00 WIB` (`13:00 UTC`),
+- cek kondisi ekstrem: setiap `1 menit` (batas minimum Wasmer Jobs).
+
+File `app.yaml` juga membuat volume persisten `/data`: kredensial Firebase hasil decode dan cache cooldown alert disimpan di sana. Ini mencegah warning terkirim berulang setiap menit saat nilai ekstrem belum turun.
+
+Deploy dari root repository dengan `wasmer deploy`, lalu masukkan seluruh environment variable pada Wasmer, khususnya `FONNTE_TOKEN`, `WA_TARGET_NUMBER`, `FIREBASE_CREDENTIALS_BASE64`, dan `APP_KEY`. Jangan menyalin rahasia ke `app.yaml`. Manifest sengaja tidak mengunci namespace package, sehingga CLI Wasmer akan memakai akun Anda saat deploy. Setelah deploy, periksa log dua job di dashboard Wasmer; keduanya harus berstatus sukses.
 
 ---
 

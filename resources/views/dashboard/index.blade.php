@@ -3,8 +3,8 @@
 @section('title', 'Dashboard - SKARP IoT')
 
 @section('content')
-<div class="min-h-screen bg-slate-100 p-4 sm:p-6">
-    <div class="mx-auto flex max-w-7xl flex-col gap-4 lg:flex-row">
+<div class="min-h-screen bg-slate-100 p-4 sm:p-6 xl:p-8 2xl:p-10">
+    <div class="mx-auto flex w-full max-w-[1800px] flex-col gap-4 lg:flex-row xl:gap-6">
         @include('dashboard.partials.sidebar')
 
         <main class="min-w-0 flex-1">
@@ -23,8 +23,8 @@
                     </div>
                 </div>
 
-                <div class="grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
-                    <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                <div class="grid gap-4 2xl:grid-cols-[minmax(0,1fr)_320px]">
+                    <div class="grid gap-4 sm:grid-cols-2 2xl:grid-cols-4">
                         <article class="rounded-lg bg-sky-700 p-5 text-white shadow-lg shadow-sky-700/20">
                             <div class="flex items-start justify-between gap-3">
                                 <div>
@@ -97,7 +97,7 @@
                         </article>
                     </div>
 
-                    <aside class="grid gap-4">
+                    <aside class="grid gap-4 sm:grid-cols-2 2xl:grid-cols-1">
                         <article class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
                             <div class="flex items-start justify-between gap-3">
                                 <div>

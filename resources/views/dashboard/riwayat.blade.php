@@ -3,8 +3,8 @@
 @section('title', 'Riwayat - SKARP IoT')
 
 @section('content')
-<div class="min-h-screen bg-slate-100 p-4 sm:p-6">
-    <div class="mx-auto flex max-w-7xl flex-col gap-4 lg:flex-row">
+<div class="min-h-screen bg-slate-100 p-4 sm:p-6 xl:p-8 2xl:p-10">
+    <div class="mx-auto flex w-full max-w-[1800px] flex-col gap-4 lg:flex-row xl:gap-6">
         @include('dashboard.partials.sidebar')
 
         <main class="min-w-0 flex-1">
@@ -18,8 +18,8 @@
                     <span class="w-fit rounded-full bg-slate-100 px-3 py-1 text-xs font-extrabold text-slate-500">{{ count($monthlyHistory) }} bulan</span>
                 </div>
 
-                <form class="mb-5 flex flex-col gap-3 border-b border-slate-200 pb-5 lg:flex-row lg:items-end" method="GET">
-                    <div class="min-w-48">
+                <form class="mb-5 flex flex-col gap-3 border-b border-slate-200 pb-5 lg:flex-row lg:flex-wrap lg:items-end" method="GET">
+                    <div class="w-full sm:w-56">
                         <label for="period" class="mb-1 block text-xs font-bold text-slate-600">Periode ekspor</label>
                         <select id="period" name="period" class="w-full rounded-md border-slate-300 text-sm focus:border-sky-600 focus:ring-sky-600">
                             <option value="all">Semua data</option>
@@ -31,9 +31,9 @@
                         <div><label for="start_date" class="mb-1 block text-xs font-bold text-slate-600">Tanggal awal</label><input id="start_date" type="date" name="start_date" class="rounded-md border-slate-300 text-sm focus:border-sky-600 focus:ring-sky-600"></div>
                         <div><label for="end_date" class="mb-1 block text-xs font-bold text-slate-600">Tanggal akhir</label><input id="end_date" type="date" name="end_date" class="rounded-md border-slate-300 text-sm focus:border-sky-600 focus:ring-sky-600"></div>
                     </div>
-                    <div class="flex gap-2 lg:ml-auto">
-                        <button type="submit" formaction="{{ route('riwayat.export.excel') }}" class="inline-flex items-center justify-center rounded-md bg-emerald-700 px-4 py-2 text-sm font-bold text-white hover:bg-emerald-800">Export Excel</button>
-                        <button type="submit" formaction="{{ route('riwayat.export.pdf') }}" class="inline-flex items-center justify-center rounded-md bg-rose-700 px-4 py-2 text-sm font-bold text-white hover:bg-rose-800">PDF Ringkasan</button>
+                    <div class="flex flex-col gap-2 sm:flex-row lg:ml-auto">
+                        <button type="submit" formaction="{{ route('riwayat.export.excel') }}" class="inline-flex w-full items-center justify-center rounded-md bg-emerald-700 px-4 py-2 text-sm font-bold text-white hover:bg-emerald-800 sm:w-auto">Export Excel</button>
+                        <button type="submit" formaction="{{ route('riwayat.export.pdf') }}" class="inline-flex w-full items-center justify-center rounded-md bg-rose-700 px-4 py-2 text-sm font-bold text-white hover:bg-rose-800 sm:w-auto">PDF Ringkasan</button>
                     </div>
                 </form>
 

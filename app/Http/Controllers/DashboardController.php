@@ -91,6 +91,7 @@ class DashboardController extends Controller
 
         foreach ($rawHistory as $entry) {
             if (!isset($entry['timestamp'])) continue;
+            if ($this->isAmoniaOutlier($entry)) continue;
 
             $timestamp = $entry['timestamp'];
             $dateObj = \DateTime::createFromFormat('Y-m-d H:i:s', $timestamp);
@@ -248,6 +249,13 @@ class DashboardController extends Controller
     private function numericValue($value)
     {
         return is_numeric($value) ? (float) $value : null;
+    }
+
+    private function isAmoniaOutlier(array $entry): bool
+    {
+        return isset($entry['amonia_ppm'])
+            && is_numeric($entry['amonia_ppm'])
+            && (float) $entry['amonia_ppm'] > config('sensor_alerts.history_max_amonia');
     }
 
     private function formatTimeDisplay($timestamp)

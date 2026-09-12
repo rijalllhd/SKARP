@@ -6,7 +6,7 @@
     ];
 @endphp
 
-<aside class="flex shrink-0 flex-col gap-6 rounded-lg border border-white/70 bg-white/80 p-4 shadow-sm lg:w-64">
+<aside class="flex shrink-0 flex-col gap-6 rounded-lg border border-white/70 bg-white/80 p-4 shadow-sm lg:sticky lg:top-6 lg:h-[calc(100vh-3rem)] lg:w-64 xl:top-8 xl:h-[calc(100vh-4rem)]">
     <a href="{{ route('dashboard') }}" class="flex items-center gap-3 px-2">
         <span class="flex h-11 w-11 items-center justify-center rounded-lg bg-white shadow-sm">
             <img src="{{ asset('images/logoskarprill.png') }}" alt="SKARP Logo" class="h-8 w-8 object-contain">

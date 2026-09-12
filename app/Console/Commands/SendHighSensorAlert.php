@@ -29,12 +29,19 @@ class SendHighSensorAlert extends Command
                 return self::SUCCESS;
             }
 
-            if (! Cache::add('sensor-high-alert-active', true, now()->addMinutes(config('sensor_alerts.cooldown_minutes')))) {
+            if (! config('services.fonnte.token') || ! config('services.fonnte.target')) {
+                throw new \RuntimeException('FONNTE_TOKEN atau WA_TARGET_NUMBER belum dikonfigurasi.');
+            }
+
+            // The cache is written only after a confirmed send. A temporary API
+            // failure therefore retries on the next scheduled run instead of
+            // suppressing alerts for the whole cooldown period.
+            if (Cache::has('sensor-high-alert-active')) {
                 return self::SUCCESS;
             }
 
-            $response = $fonnte->send($message->highAlert($data));
-            $response->throw();
+            $fonnte->send($message->highAlert($data));
+            Cache::put('sensor-high-alert-active', true, now()->addMinutes(config('sensor_alerts.cooldown_minutes')));
             $this->warn('Peringatan WhatsApp terkirim.');
             return self::SUCCESS;
         } catch (\Throwable $exception) {
