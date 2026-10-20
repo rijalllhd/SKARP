@@ -13,9 +13,11 @@ class HistoryExportController extends Controller
 {
     public function excel(Request $request, FirebaseSensorService $sensor)
     {
-        try {
-            $filter = $this->filter($request, $sensor);
+        // Pengambilan data sama dengan ekspor PDF. Jika bagian ini gagal,
+        // kemungkinan penyebabnya memang Firebase/parameter filter.
+        $filter = $this->filter($request, $sensor);
 
+        try {
             return Excel::download(
                 new SensorHistoryExport($filter['rows']),
                 'riwayat-sensor-'.$filter['suffix'].'.xlsx',
@@ -27,7 +29,7 @@ class HistoryExportController extends Controller
 
             return redirect()
                 ->route('riwayat')
-                ->with('exportError', 'File Excel belum dapat dibuat karena data Firebase tidak bisa diambil. Periksa koneksi Firebase lalu coba lagi.');
+                ->with('exportError', 'File Excel belum dapat dibuat. Coba pilih periode yang lebih pendek lalu ulangi.');
         }
     }
 
@@ -66,10 +68,12 @@ class HistoryExportController extends Controller
             ->sortBy('timestamp')
             ->map(fn ($entry) => [
                 'timestamp' => $entry['timestamp'],
-                'suhu' => $entry['suhu'] ?? null,
-                'kelembapan' => $entry['kelembapan'] ?? null,
-                'amonia_ppm' => $entry['amonia_ppm'] ?? null,
-                'thi' => $entry['thi'] ?? null,
+                // Firebase tidak memiliki schema ketat. Pastikan XLSX hanya
+                // menerima nilai sel yang valid, bukan object/array sensor.
+                'suhu' => $this->exportNumber($entry['suhu'] ?? null),
+                'kelembapan' => $this->exportNumber($entry['kelembapan'] ?? null),
+                'amonia_ppm' => $this->exportNumber($entry['amonia_ppm'] ?? null),
+                'thi' => $this->exportNumber($entry['thi'] ?? null),
             ])->values()->all();
 
         $labels = ['all' => 'Semua data', 'last_month' => '1 bulan terakhir', 'range' => 'Rentang '.$request->start_date.' s.d. '.$request->end_date];
@@ -120,5 +124,16 @@ class HistoryExportController extends Controller
     private function emptyStats(): array
     {
         return ['min' => INF, 'max' => -INF, 'sum' => 0, 'count' => 0];
+    }
+
+    private function exportNumber(mixed $value): ?float
+    {
+        if (! is_numeric($value)) {
+            return null;
+        }
+
+        $number = (float) $value;
+
+        return is_finite($number) ? $number : null;
     }
 }
