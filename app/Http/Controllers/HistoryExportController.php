@@ -6,6 +6,7 @@ use App\Exports\SensorHistoryExport;
 use App\Services\FirebaseSensorService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
 use Barryvdh\DomPDF\Facade\Pdf;
 
@@ -26,10 +27,11 @@ class HistoryExportController extends Controller
             );
         } catch (\Throwable $exception) {
             report($exception);
+            Log::warning('XLSX export gagal; mengirim CSV yang kompatibel dengan Excel sebagai fallback.', [
+                'exception' => $exception->getMessage(),
+            ]);
 
-            return redirect()
-                ->route('riwayat')
-                ->with('exportError', 'File Excel belum dapat dibuat. Coba pilih periode yang lebih pendek lalu ulangi.');
+            return $this->csvDownload($filter['rows'], $filter['suffix']);
         }
     }
 
@@ -135,5 +137,28 @@ class HistoryExportController extends Controller
         $number = (float) $value;
 
         return is_finite($number) ? $number : null;
+    }
+
+    private function csvDownload(array $rows, string $suffix)
+    {
+        return response()->streamDownload(function () use ($rows) {
+            $output = fopen('php://output', 'wb');
+            fwrite($output, "\xEF\xBB\xBF");
+            fputcsv($output, ['Waktu', 'Suhu (C)', 'Kelembapan (%)', 'Amonia (ppm)', 'THI'], ';');
+
+            foreach ($rows as $row) {
+                fputcsv($output, [
+                    $row['timestamp'],
+                    $row['suhu'],
+                    $row['kelembapan'],
+                    $row['amonia_ppm'],
+                    $row['thi'],
+                ], ';');
+            }
+
+            fclose($output);
+        }, 'riwayat-sensor-'.$suffix.'.csv', [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+        ]);
     }
 }

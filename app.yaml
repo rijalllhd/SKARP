@@ -13,6 +13,7 @@ env:
   QUEUE_CONNECTION: sync
   LOG_CHANNEL: stderr
   FIREBASE_CREDENTIALS: /data/firebase-credentials.json
+  EXCEL_TEMPORARY_PATH: /data/laravel-excel
 
 volumes:
   - name: skarp-iot-state

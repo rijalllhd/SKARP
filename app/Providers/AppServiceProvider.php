@@ -8,6 +8,13 @@ class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
+        // Wasmer exposes the persistent writable filesystem at /data. XLSX
+        // generation needs a temporary ZIP file, so do not depend on /app
+        // being writable there.
+        if ($temporaryPath = env('EXCEL_TEMPORARY_PATH')) {
+            config()->set('excel.temporary_files.local_path', $temporaryPath);
+        }
+
         $this->ensureFirebaseCredentialsExist();
     }
 
