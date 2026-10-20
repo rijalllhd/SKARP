@@ -13,13 +13,22 @@ class HistoryExportController extends Controller
 {
     public function excel(Request $request, FirebaseSensorService $sensor)
     {
-        $filter = $this->filter($request, $sensor);
-        return Excel::download(
-            new SensorHistoryExport($filter['rows']),
-            'riwayat-sensor-'.$filter['suffix'].'.xlsx',
-            \Maatwebsite\Excel\Excel::XLSX,
-            ['Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet']
-        );
+        try {
+            $filter = $this->filter($request, $sensor);
+
+            return Excel::download(
+                new SensorHistoryExport($filter['rows']),
+                'riwayat-sensor-'.$filter['suffix'].'.xlsx',
+                \Maatwebsite\Excel\Excel::XLSX,
+                ['Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet']
+            );
+        } catch (\Throwable $exception) {
+            report($exception);
+
+            return redirect()
+                ->route('riwayat')
+                ->with('exportError', 'File Excel belum dapat dibuat karena data Firebase tidak bisa diambil. Periksa koneksi Firebase lalu coba lagi.');
+        }
     }
 
     public function pdf(Request $request, FirebaseSensorService $sensor)
@@ -34,15 +43,17 @@ class HistoryExportController extends Controller
     private function filter(Request $request, FirebaseSensorService $sensor): array
     {
         $validated = $request->validate([
-            'period' => ['required', 'in:all,last_month,range'],
+            'period' => ['nullable', 'in:all,last_month,range'],
             'start_date' => ['nullable', 'date'],
             'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],
         ]);
-        if ($validated['period'] === 'range' && (! $request->filled('start_date') || ! $request->filled('end_date'))) {
+        $period = $validated['period'] ?? 'all';
+
+        if ($period === 'range' && (! $request->filled('start_date') || ! $request->filled('end_date'))) {
             abort(422, 'Tanggal awal dan akhir wajib diisi untuk pilihan rentang.');
         }
 
-        $start = $validated['period'] === 'last_month' ? now('Asia/Jakarta')->subMonth()->startOfDay() : ($request->filled('start_date') ? Carbon::parse($request->start_date, 'Asia/Jakarta')->startOfDay() : null);
+        $start = $period === 'last_month' ? now('Asia/Jakarta')->subMonth()->startOfDay() : ($request->filled('start_date') ? Carbon::parse($request->start_date, 'Asia/Jakarta')->startOfDay() : null);
         $end = $request->filled('end_date') ? Carbon::parse($request->end_date, 'Asia/Jakarta')->endOfDay() : null;
 
         $rows = collect($sensor->history())
@@ -62,7 +73,7 @@ class HistoryExportController extends Controller
             ])->values()->all();
 
         $labels = ['all' => 'Semua data', 'last_month' => '1 bulan terakhir', 'range' => 'Rentang '.$request->start_date.' s.d. '.$request->end_date];
-        return ['rows' => $rows, 'periodLabel' => $labels[$validated['period']], 'suffix' => now()->format('Ymd-His')];
+        return ['rows' => $rows, 'periodLabel' => $labels[$period], 'suffix' => now()->format('Ymd-His')];
     }
 
     private function summarizeForPdf(array $rows): array

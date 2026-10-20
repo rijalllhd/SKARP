@@ -18,6 +18,12 @@
                     <span class="w-fit rounded-full bg-slate-100 px-3 py-1 text-xs font-extrabold text-slate-500">{{ count($monthlyHistory) }} bulan</span>
                 </div>
 
+                @if (session('exportError'))
+                    <div role="alert" class="mb-5 rounded-md border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-800">
+                        {{ session('exportError') }}
+                    </div>
+                @endif
+
                 <form class="mb-5 flex flex-col gap-3 border-b border-slate-200 pb-5 lg:flex-row lg:flex-wrap lg:items-end" method="GET">
                     <div class="w-full sm:w-56">
                         <label for="period" class="mb-1 block text-xs font-bold text-slate-600">Periode ekspor</label>
