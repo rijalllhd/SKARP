@@ -2,27 +2,28 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\HistoryViewDataService;
 use Illuminate\Http\Request;
 use Kreait\Firebase\Factory;
 
 class DashboardController extends Controller
 {
-    public function index()
+    public function index(HistoryViewDataService $historyView)
     {
-        return view('dashboard.index', $this->dashboardData());
+        return view('dashboard.index', $this->dashboardData($historyView));
     }
 
-    public function analitic()
+    public function analitic(HistoryViewDataService $historyView)
     {
-        return view('dashboard.analitic', $this->dashboardData());
+        return view('dashboard.analitic', $this->dashboardData($historyView));
     }
 
-    public function riwayat()
+    public function riwayat(HistoryViewDataService $historyView)
     {
-        return view('dashboard.riwayat', $this->dashboardData());
+        return view('dashboard.riwayat', $this->dashboardData($historyView));
     }
 
-    private function dashboardData()
+    private function dashboardData(HistoryViewDataService $historyView)
     {
         $firebaseConfig = [
             'apiKey'            => config('firebase_client.api_key'),
@@ -69,7 +70,7 @@ class DashboardController extends Controller
             $historySnapshot = $database->getReference($sensorPath . '/History')->getSnapshot();
             if ($historySnapshot->exists()) {
                 $rawHistory = $historySnapshot->getValue() ?? [];
-                $monthlyHistory = $this->aggregateByMonth($rawHistory);
+                $monthlyHistory = $historyView->monthly($rawHistory);
                 $historyChartData = $this->buildHistoryChartData($monthlyHistory);
             }
         } catch (\Exception $e) {

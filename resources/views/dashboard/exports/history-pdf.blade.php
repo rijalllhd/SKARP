@@ -30,7 +30,7 @@
         <tbody>
             @forelse($rows as $row)
                 <tr>
-                    <td>{{ $row['date'] }}</td><td>{{ $row['count'] }}</td>
+                    <td>{{ $row['date'] }}</td><td>{{ $row['dataPoints'] }}</td>
                     <td>{{ number_format($row['suhu']['min'], 1) }}</td><td>{{ number_format($row['suhu']['avg'], 1) }}</td><td>{{ number_format($row['suhu']['max'], 1) }}</td>
                     <td>{{ number_format($row['kelembapan']['min'], 1) }}</td><td>{{ number_format($row['kelembapan']['avg'], 1) }}</td><td>{{ number_format($row['kelembapan']['max'], 1) }}</td>
                     <td>{{ number_format($row['amonia_ppm']['min'], 3) }}</td><td>{{ number_format($row['amonia_ppm']['avg'], 3) }}</td><td>{{ number_format($row['amonia_ppm']['max'], 3) }}</td>
